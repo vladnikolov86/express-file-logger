@@ -14,5 +14,8 @@
     "logs"
   ],
   "author": "Vladislav <nikolov.vladislav@gmail.com> (https://github.com/vvn050)",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+   
+  }
 }
