@@ -1,5 +1,6 @@
 var fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    mkdirp = require('mkdirp');
 
 const defaultOptions = {
     storagePath: __dirname + '/logs',
@@ -12,9 +13,10 @@ function checkDirectory(directory, callback) {
         fs
             .stat(directory, function (err, stats) {
                 if (err) {
-                    fs.mkdir(directory, callback);
-                    resolve();
-                    console.log('not found ---> creating it')
+                    mkdirp(directory, function () {
+                        resolve();
+                    });
+
                 } else {
                     resolve();
                     callback();
@@ -63,7 +65,8 @@ async function getCurrentLogFileName(config) {
 
 var logDirectoryExists = false,
     logFileName = '',
-    appendedDirectory = '';
+    appendedDirectory = '',
+    loggerInitializedOnce = false;
 
 module.exports = function (options) {
 
@@ -76,6 +79,7 @@ module.exports = function (options) {
         //The check should be performed only once, on app initialization
         if (!logDirectoryExists) {
             await checkDirectory(options.storagePath, function (result) {
+                console.log(options.storagePath)
                 logDirectoryExists = true;
             }, function () {
                 logDirectoryExists = false;
@@ -88,25 +92,36 @@ module.exports = function (options) {
             logFileName = currentLogName;
         }
 
-        res
-            .on("finish", async function () {
-                let streamPath = path.join(options.storagePath + '/' + appendedDirectory);
+        var streamPath = path.join(options.storagePath + '/' + appendedDirectory);
 
-                var logStream = fs.createWriteStream((streamPath) + logFileName, {
-                    'flags': 'a',
-                    'encoding': 'UTF8'
-                });
-
-                logStream.write("Request headers:" + JSON.stringify(req.headers));
-                logStream.write('\r\n');
-                logStream.write("Request response code:" + res.statusCode + '. Response message:' + res.statusMessage);
-                logStream.write('\r\n');
-                logStream.write('\r\n');
-                logStream.end(function () {
-                   
-                });
-                next()
+        //This should be executed only once
+        if (!loggerInitializedOnce) {
+            let logStream = fs.createWriteStream((streamPath) + logFileName, {
+                'flags': 'a',
+                'encoding': 'UTF8'
             });
+            logStream.write("Logger service initialized on" + new Date().toUTCString());
+            logStream.write('\r\n');
+            logStream.end(function () {});
+            loggerInitializedOnce = true;
+        }
+
+        res.on("finish", async function () {
+
+            let logStream = fs.createWriteStream((streamPath) + logFileName, {
+                'flags': 'a',
+                'encoding': 'UTF8'
+            });
+            logStream.write("Request time: " + new Date().toUTCString());
+            logStream.write('\r\n');
+            logStream.write("Request headers:" + JSON.stringify(req.headers));
+            logStream.write('\r\n');
+            logStream.write("Request response code:" + res.statusCode + '. Response message:' + res.statusMessage);
+            logStream.write('\r\n');
+            logStream.write('\r\n');
+            logStream.end(function () {});
+            next()
+        });
         next()
     }
 }
