@@ -1,6 +1,8 @@
 var fs = require('fs'),
     path = require('path'),
-    mkdirp = require('mkdirp');
+    mkdirp = require('mkdirp'),
+     endOfLine = require('os').EOL;
+
 
 const defaultOptions = {
     storagePath: __dirname + '/logs',
@@ -73,13 +75,18 @@ module.exports = function (options) {
     //No options passed => fallback to default options
     if (!options) {
         options = JSON.parse(JSON.stringify(defaultOptions));
+    } else {
+        for (var prop in defaultOptions) {
+            if (!options.hasOwnProperty(prop)) {
+                options[prop] = defaultOptions[prop];
+            }
+        }
     }
 
     return async function (req, res, next) {
         //The check should be performed only once, on app initialization
         if (!logDirectoryExists) {
             await checkDirectory(options.storagePath, function (result) {
-                console.log(options.storagePath)
                 logDirectoryExists = true;
             }, function () {
                 logDirectoryExists = false;
@@ -88,6 +95,7 @@ module.exports = function (options) {
 
         //Check for new day to start a new File
         var currentLogName = await getCurrentLogFileName(options);
+
         if (logFileName.length === 0 || currentLogName !== logFileName) {
             logFileName = currentLogName;
         }
@@ -101,27 +109,28 @@ module.exports = function (options) {
                 'encoding': 'UTF8'
             });
             logStream.write("Logger service initialized on" + new Date().toUTCString());
-            logStream.write('\r\n');
+            logStream.write(endOfLine);
             logStream.end(function () {});
             loggerInitializedOnce = true;
         }
 
-        res.on("finish", async function () {
+        res
+            .on("finish", async function () {
 
-            let logStream = fs.createWriteStream((streamPath) + logFileName, {
-                'flags': 'a',
-                'encoding': 'UTF8'
+                let logStream = fs.createWriteStream((streamPath) + logFileName, {
+                    'flags': 'a',
+                    'encoding': 'UTF8'
+                });
+                logStream.write("Request time: " + new Date().toUTCString());
+                logStream.write(endOfLine);
+                logStream.write("Request headers:" + JSON.stringify(req.headers));
+                logStream.write(endOfLine);
+                logStream.write("Request response code:" + res.statusCode + '. Response message:' + res.statusMessage);
+                logStream.write(endOfLine);
+                logStream.write(endOfLine);
+                logStream.end(function () {});
+                next()
             });
-            logStream.write("Request time: " + new Date().toUTCString());
-            logStream.write('\r\n');
-            logStream.write("Request headers:" + JSON.stringify(req.headers));
-            logStream.write('\r\n');
-            logStream.write("Request response code:" + res.statusCode + '. Response message:' + res.statusMessage);
-            logStream.write('\r\n');
-            logStream.write('\r\n');
-            logStream.end(function () {});
-            next()
-        });
         next()
     }
 }

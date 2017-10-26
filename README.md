@@ -2,7 +2,7 @@
 
 Prerequisites
 -----------
-installed Node JS ver 8.5 and above and Express JS
+installed Node JS ver 7.6 and above and Express JS
 
 
 How to use the logger
@@ -11,9 +11,10 @@ How to use the logger
 As an application middleware. Example:
 
  **var loggerService** = require('expressjs-file-logger');  
- **module.exports = function (app) {  app.use(loggerService(loggerConfig)); }  **
+ **var app = express();**
+ **app.use(loggerService(loggerConfig)); }**
  
- Logger config is an object with the following default properties:  
+ Logger config is an object with the following default properties. Any of them could be overriden:  
  
  **const defaultOptions** = {  
     storagePath: __dirname + '/logs',   
