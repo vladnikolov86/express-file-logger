@@ -8,8 +8,8 @@ installed Node JS ver 7.6 and above and Express JS
 How to use the logger
 ----------------------------
 
-As an application middleware. Example:
- **var app = express();**
+As an application middleware. Example:  
+ **var app = express();**  
  **var loggerService** = require('expressjs-file-logger');  
 
  **app.use(loggerService(loggerConfig));**
@@ -19,7 +19,7 @@ As an application middleware. Example:
  **const defaultOptions** = {  
     storagePath: __dirname + '/logs',   
     logType: 'day',  
-    logNameSeparator: '-',
+    logNameSeparator: '-',  
     logMode: 'all'  
 };  
 **loggerConfig.storagePath** - Path for logs' storage. If path does not exist it will be created.  
