@@ -1,13 +1,13 @@
 var fs = require('fs'),
     path = require('path'),
     mkdirp = require('mkdirp'),
-     endOfLine = require('os').EOL;
-
+    endOfLine = require('os').EOL;
 
 const defaultOptions = {
     storagePath: __dirname + '/logs',
     logType: 'day',
-    logNameSeparator: '-'
+    logNameSeparator: '-',
+    logMode: 'all'
 };
 
 function checkDirectory(directory, callback) {
@@ -65,6 +65,21 @@ async function getCurrentLogFileName(config) {
     }
 }
 
+function logContentToFile(res, req, streamPath, logFileName) {
+    let logStream = fs.createWriteStream((streamPath) + logFileName, {
+        'flags': 'a',
+        'encoding': 'UTF8'
+    });
+    logStream.write("Request time: " + new Date().toUTCString());
+    logStream.write(endOfLine);
+    logStream.write("Request headers:" + JSON.stringify(req.headers));
+    logStream.write(endOfLine);
+    logStream.write("Request response code:" + res.statusCode + '. Response message:' + res.statusMessage);
+    logStream.write(endOfLine);
+    logStream.write(endOfLine);
+    logStream.end(function () {});
+}
+
 var logDirectoryExists = false,
     logFileName = '',
     appendedDirectory = '',
@@ -116,19 +131,12 @@ module.exports = function (options) {
 
         res
             .on("finish", async function () {
+                if (options.logMode === 'all') {
+                    logContentToFile(res, req, streamPath, logFileName);
+                } else if (options.logMode === 'errors' && res.statusCode >= 400) {
+                    logContentToFile(res, req, streamPath, logFileName);
+                }
 
-                let logStream = fs.createWriteStream((streamPath) + logFileName, {
-                    'flags': 'a',
-                    'encoding': 'UTF8'
-                });
-                logStream.write("Request time: " + new Date().toUTCString());
-                logStream.write(endOfLine);
-                logStream.write("Request headers:" + JSON.stringify(req.headers));
-                logStream.write(endOfLine);
-                logStream.write("Request response code:" + res.statusCode + '. Response message:' + res.statusMessage);
-                logStream.write(endOfLine);
-                logStream.write(endOfLine);
-                logStream.end(function () {});
                 next()
             });
         next()
