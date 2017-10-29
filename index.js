@@ -7,8 +7,20 @@ const defaultOptions = {
     storagePath: __dirname + '/logs',
     logType: 'day',
     logNameSeparator: '-',
-    logMode: 'all'
+    logMode: 'all',
+    logRequestBody: true
 };
+
+function initlizeLogger(streamPath, logFileName) {
+    let logStream = fs.createWriteStream((streamPath) + logFileName, {
+        'flags': 'a',
+        'encoding': 'UTF8'
+    });
+    logStream.write("Logger service initialized on" + new Date().toUTCString());
+    logStream.write(endOfLine);
+    logStream.end(function () {});
+    loggerInitializedOnce = true;
+}
 
 function checkDirectory(directory, callback) {
     return new Promise((resolve, reject) => {
@@ -75,9 +87,28 @@ function logContentToFile(res, req, streamPath, logFileName) {
     logStream.write("Request headers:" + JSON.stringify(req.headers));
     logStream.write(endOfLine);
     logStream.write("Request response code:" + res.statusCode + '. Response message:' + res.statusMessage);
+    if (defaultOptions.logRequestBody && res.cachedBody) {
+        logStream.write(endOfLine);
+        logStream.write("Response message from body:" + res.cachedBody);
+        res.cachedBody = null;
+    }
+
     logStream.write(endOfLine);
     logStream.write(endOfLine);
     logStream.end(function () {});
+}
+
+function overrideResponseSend(res) {
+    res.sendOverriden = res.send;
+    res.send = function (chunk) {
+        if (typeof chunk === 'string') {
+            res.cachedBody = chunk;
+        }
+
+        res
+            .sendOverriden
+            .call(this, chunk);
+    }
 }
 
 var logDirectoryExists = false,
@@ -108,7 +139,10 @@ module.exports = function (options) {
             });
         }
 
-        //Check for new day to start a new File
+        if (defaultOptions.logRequestBody) {
+            overrideResponseSend(res);
+        }
+
         var currentLogName = await getCurrentLogFileName(options);
 
         if (logFileName.length === 0 || currentLogName !== logFileName) {
@@ -119,18 +153,12 @@ module.exports = function (options) {
 
         //This should be executed only once
         if (!loggerInitializedOnce) {
-            let logStream = fs.createWriteStream((streamPath) + logFileName, {
-                'flags': 'a',
-                'encoding': 'UTF8'
-            });
-            logStream.write("Logger service initialized on" + new Date().toUTCString());
-            logStream.write(endOfLine);
-            logStream.end(function () {});
-            loggerInitializedOnce = true;
+            initlizeLogger(streamPath, logFileName);
         }
 
         res
             .on("finish", async function () {
+                console.log(res.cachedBody)
                 if (options.logMode === 'all') {
                     logContentToFile(res, req, streamPath, logFileName);
                 } else if (options.logMode === 'errors' && res.statusCode >= 400) {
@@ -141,4 +169,4 @@ module.exports = function (options) {
             });
         next()
     }
-}
+};
