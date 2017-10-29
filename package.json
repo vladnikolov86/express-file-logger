@@ -1,13 +1,13 @@
 {
   "name": "expressjs-file-logger",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "File logger for express js. Logs incoming requests and server's responses.",
   "main": "logger.service.js",
   "url": "https://github.com/vvn050/express-file-logger.git",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-   "files": [
+  "files": [
     "index.js"
   ],
   "keywords": [
@@ -19,6 +19,6 @@
   "author": "Vladislav <nikolov.vladislav@gmail.com> (https://github.com/vvn050)",
   "license": "MIT",
   "dependencies": {
-   
+    "mkdirp": "^0.5.1"
   }
 }
