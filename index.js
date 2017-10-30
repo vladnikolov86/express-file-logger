@@ -3,14 +3,6 @@ var fs = require('fs'),
     mkdirp = require('mkdirp'),
     endOfLine = require('os').EOL;
 
-const defaultOptions = {
-    storagePath: __dirname + '/logs',
-    logType: 'day',
-    logNameSeparator: '-',
-    logMode: 'all',
-    logRequestBody: true
-};
-
 function initlizeLogger(streamPath, logFileName) {
     let logStream = fs.createWriteStream((streamPath) + logFileName, {
         'flags': 'a',
@@ -60,7 +52,7 @@ async function getCurrentLogFileName(config) {
     switch (config.logType) {
         case 'day':
             var currentFileName = getCurrentDateAsName(config);
-            return currentFileName + '.txt';
+            return currentFileName + config.logFilesExtension;
         case 'hour':
             var currentFolderName = getCurrentDateAsName(config);
             var currentDate = new Date();
@@ -69,7 +61,7 @@ async function getCurrentLogFileName(config) {
             appendedDirectory = currentFolderName + '/';
             await checkDirectory(config.storagePath + '/' + appendedDirectory, function (res) {}, function (err) {});
 
-            return currentFolderName + config.logNameSeparator + currentDate.getUTCHours() + '.txt';
+            return currentFolderName + config.logNameSeparator + currentDate.getUTCHours() +  config.logFilesExtension;
         default:
             console.log('Not supported, yet!');
             return new Date().toString();
@@ -116,6 +108,15 @@ var logDirectoryExists = false,
     appendedDirectory = '',
     loggerInitializedOnce = false;
 
+const defaultOptions = {
+    storagePath: __dirname + '/logs',
+    logType: 'day',
+    logNameSeparator: '-',
+    logMode: 'all',
+    logRequestBody: true,
+    logFilesExtension: '.txt'
+};
+
 module.exports = function (options) {
 
     //No options passed => fallback to default options
@@ -158,7 +159,6 @@ module.exports = function (options) {
 
         res
             .on("finish", async function () {
-                console.log(res.cachedBody)
                 if (options.logMode === 'all') {
                     logContentToFile(res, req, streamPath, logFileName);
                 } else if (options.logMode === 'errors' && res.statusCode >= 400) {

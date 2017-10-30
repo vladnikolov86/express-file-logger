@@ -21,7 +21,8 @@ As an application middleware. Example:
     logType: 'day',  
     logNameSeparator: '-',  
     logMode: 'all',  
-    logRequestBody: true  
+    logRequestBody: true,  
+    logFilesExtension: '.txt'  
 };  
 **loggerConfig.storagePath** - Path for logs' storage. If path does not exist it will be created.  
 
@@ -31,6 +32,7 @@ As an application middleware. Example:
 **loggerConfig.logNameSeparator** - by default **'-'**. This is the separator used for file and directory names.  
 **loggerConfig.logMode** - by default **'all'**, logger will log every request. If set to **'errors'**, it will log only 400 and above status codes.  
 **loggerConfig.logRequestBody** - by default **true**, logger will log every request's body. If set to **false**, it will log only status code and status message.  
+**loggerConfig.logRequestBody** - by default **.txt**. Files will be saved with '.txt' extension. Could be overriden to '.log' or any other appropriate fromat.  
 
 **Note** - all dates are UTC format. Module uses async/await so Node JS version should support it
 
