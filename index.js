@@ -8,7 +8,7 @@ function initlizeLogger(streamPath, logFileName) {
         'flags': 'a',
         'encoding': 'UTF8'
     });
-    logStream.write("Logger service initialized on" + new Date().toUTCString());
+    logStream.write("Logger service initialized on " + new Date().toUTCString());
     logStream.write(endOfLine);
     logStream.end(function () {});
     loggerInitializedOnce = true;
@@ -36,12 +36,14 @@ function getCurrentDateAsName(config) {
     let date = currentDate
             .getUTCDate()
             .toString(),
-        month = currentDate
-            .getUTCMonth()
-            .toString(),
-        year = currentDate
-            .getUTCFullYear()
-            .toString();
+        month = currentDate.getUTCMonth();
+    year = currentDate
+        .getUTCFullYear()
+        .toString();
+
+    //Convert to current month /not starting from 0/
+    month += 1;
+    month = month.toString();
 
     var logNameSeparator = config.logNameSeparator;
 
@@ -61,7 +63,7 @@ async function getCurrentLogFileName(config) {
             appendedDirectory = currentFolderName + '/';
             await checkDirectory(config.storagePath + '/' + appendedDirectory, function (res) {}, function (err) {});
 
-            return currentFolderName + config.logNameSeparator + currentDate.getUTCHours() +  config.logFilesExtension;
+            return currentFolderName + config.logNameSeparator + currentDate.getUTCHours() + config.logFilesExtension;
         default:
             console.log('Not supported, yet!');
             return new Date().toString();
