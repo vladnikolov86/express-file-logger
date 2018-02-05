@@ -1,19 +1,17 @@
 {
   "name": "expressjs-file-logger",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "File logger for express js. Logs incoming requests and server's responses.",
   "main": "logger.service.js",
   "url": "https://github.com/vvn050/express-file-logger.git",
   "engines": {
-    "node": ">=7.6"
+    "node": ">=7.6",
+    "minimumNodeVersion": "7.6"
   },
   "engineStrict": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "files": [
-    "index.js"
-  ],
   "keywords": [
     "express",
     "logger",

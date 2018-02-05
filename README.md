@@ -2,20 +2,22 @@
 
 Prerequisites
 -----------
-installed Node JS ver 7.6 and above and Express JS
+Installed Node JS version 7.6 and above and Express JS
 
 
 How to use the logger
 ----------------------------
 
 As an application middleware. Example:  
- **var app = express();**  
- **var loggerService** = require('expressjs-file-logger');  
+ ```json
+var app = express(); 
+var loggerService = require('expressjs-file-logger');  
 
- **app.use(loggerService(loggerConfig));**
+app.use(loggerService(loggerConfig));
+ ```
  
  Logger config is an object with the following default properties. Any of them could be overriden:  
- 
+ ```json
  **const defaultOptions** = {  
     storagePath: __dirname + '/logs',   
     logType: 'day',  
@@ -24,6 +26,7 @@ As an application middleware. Example:
     logRequestBody: true,  
     logFilesExtension: '.txt'  
 };  
+ ```
 **loggerConfig.storagePath** - Path for logs' storage. If path does not exist it will be created.  
 
 **loggerConfig.logType** - Default value is **'day'**. Every day a new file will be created with the following name **'DD-MM-YYYY'**.   
@@ -35,4 +38,3 @@ As an application middleware. Example:
 **loggerConfig.logRequestBody** - by default **.txt**. Files will be saved with '.txt' extension. Could be overriden to '.log' or any other appropriate fromat.  
 
 **Note** - all dates are UTC format. Module uses async/await so Node JS version should support it
-
