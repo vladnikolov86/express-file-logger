@@ -1,6 +1,6 @@
 {
   "name": "expressjs-file-logger",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "File logger for express js. Logs incoming requests and server's responses.",
   "main": "logger.service.js",
   "url": "https://github.com/vvn050/express-file-logger.git",
