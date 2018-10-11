@@ -10,16 +10,16 @@ How to use the logger
 
 As an application middleware. Example:  
  ```json
-var app = express(); 
-var loggerService = require('expressjs-file-logger');  
+const app = express(); 
+const loggerService = require('expressjs-file-logger');  
 
 app.use(loggerService(loggerConfig));
  ```
  
  Logger config is an object with the following default properties. Any of them could be overriden:  
  ```json
- **const defaultOptions** = {  
-    storagePath: __dirname + '/logs',   
+ const defaultOptions = {  
+    storagePath: process.cwd() + '/logs',   
     logType: 'day',  
     logNameSeparator: '-',  
     logMode: 'all',  

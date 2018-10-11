@@ -112,7 +112,7 @@ let logDirectoryExists = false,
     loggerInitializedOnce = false;
 
 const defaultOptions = {
-    storagePath: path.join(__dirname + '/logs'),
+    storagePath: path.join(process.cwd(), '/logs'),
     logType: 'day',
     logNameSeparator: '-',
     logMode: 'all',
@@ -171,5 +171,6 @@ module.exports = function (options) {
                 next();
             });
         next();
+
     }
 };
