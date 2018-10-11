@@ -19,12 +19,12 @@ app.use(loggerService(loggerConfig));
  Logger config is an object with the following default properties. Any of them could be overriden:  
  ```json
  const defaultOptions = {  
-    storagePath: process.cwd() + '/logs',   
-    logType: 'day',  
-    logNameSeparator: '-',  
-    logMode: 'all',  
-    logRequestBody: true,  
-    logFilesExtension: '.txt'  
+    "storagePath": "path.join(process.cwd(), '/logs')",   
+    "logType": "day",  
+    "logNameSeparator": "-",  
+    "logMode": "all",  
+    "logRequestBody": "true",  
+    "logFilesExtension": ".txt"  
 };  
  ```
 **loggerConfig.storagePath** - Path for logs' storage. If path does not exist it will be created.  
