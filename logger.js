@@ -1,8 +1,7 @@
-var fs = require('fs'),
+const fs = require('fs'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     endOfLine = require('os').EOL;
-
 
 function initlizeLogger(streamPath, logFileName) {
     let logStream = fs.createWriteStream((streamPath) + logFileName, {
@@ -11,7 +10,7 @@ function initlizeLogger(streamPath, logFileName) {
     });
     logStream.write("Logger service initialized on " + new Date().toUTCString());
     logStream.write(endOfLine);
-    logStream.end(function () { });
+    logStream.end(function () {});
     loggerInitializedOnce = true;
 }
 
@@ -33,20 +32,19 @@ function checkDirectory(directory, callback) {
 }
 
 function getCurrentDateAsName(config) {
-    var currentDate = new Date();
+    const logNameSeparator = config.logNameSeparator;
+    let currentDate = new Date();
     let date = currentDate
-        .getUTCDate()
-        .toString(),
-        month = currentDate.getUTCMonth();
-    year = currentDate
-        .getUTCFullYear()
-        .toString();
+            .getUTCDate()
+            .toString(),
+        month = currentDate.getUTCMonth(),
+        year = currentDate
+            .getUTCFullYear()
+            .toString();
 
     //Convert to current month /not starting from 0/
     month += 1;
     month = month.toString();
-
-    var logNameSeparator = config.logNameSeparator;
 
     return date + logNameSeparator + month + logNameSeparator + year;
 }
@@ -54,15 +52,15 @@ function getCurrentDateAsName(config) {
 async function getCurrentLogFileName(config) {
     switch (config.logType) {
         case 'day':
-            var currentFileName = getCurrentDateAsName(config);
+            let currentFileName = getCurrentDateAsName(config);
             return currentFileName + config.logFilesExtension;
         case 'hour':
-            var currentFolderName = getCurrentDateAsName(config);
-            var currentDate = new Date();
+            let currentFolderName = getCurrentDateAsName(config);
+            let currentDate = new Date();
 
             //add folder for this date to store hourly reports
             appendedDirectory = currentFolderName + '/';
-            await checkDirectory(config.storagePath + '/' + appendedDirectory, function (res) { }, function (err) { });
+            await checkDirectory(path.join(config.storagePath + '/' + appendedDirectory), function (res) {}, function (err) {});
 
             return currentFolderName + config.logNameSeparator + currentDate.getUTCHours() + config.logFilesExtension;
         default:
@@ -77,6 +75,8 @@ function logContentToFile(res, req, streamPath, logFileName) {
         'flags': 'a',
         'encoding': 'UTF8'
     });
+    logStream.write("Request url: " + req.url);
+    logStream.write(endOfLine);
     logStream.write("Request time: " + new Date().toUTCString());
     logStream.write(endOfLine);
     logStream.write("Request headers:" + JSON.stringify(req.headers));
@@ -90,7 +90,7 @@ function logContentToFile(res, req, streamPath, logFileName) {
 
     logStream.write(endOfLine);
     logStream.write(endOfLine);
-    logStream.end(function () { });
+    logStream.end(function () {});
 }
 
 function overrideResponseSend(res) {
@@ -106,13 +106,13 @@ function overrideResponseSend(res) {
     }
 }
 
-var logDirectoryExists = false,
+let logDirectoryExists = false,
     logFileName = '',
     appendedDirectory = '',
     loggerInitializedOnce = false;
 
 const defaultOptions = {
-    storagePath: __dirname + '/logs',
+    storagePath: path.join(__dirname + '/logs'),
     logType: 'day',
     logNameSeparator: '-',
     logMode: 'all',
@@ -126,7 +126,7 @@ module.exports = function (options) {
     if (!options) {
         options = JSON.parse(JSON.stringify(defaultOptions));
     } else {
-        for (var prop in defaultOptions) {
+        for (let prop in defaultOptions) {
             if (!options.hasOwnProperty(prop)) {
                 options[prop] = defaultOptions[prop];
             }
@@ -136,7 +136,7 @@ module.exports = function (options) {
     return async function (req, res, next) {
         //The check should be performed only once, on app initialization
         if (!logDirectoryExists) {
-            await checkDirectory(options.storagePath, function (result) {
+            await checkDirectory(path.resolve(options.storagePath), function (result) {
                 logDirectoryExists = true;
             }, function () {
                 logDirectoryExists = false;
@@ -147,13 +147,13 @@ module.exports = function (options) {
             overrideResponseSend(res);
         }
 
-        var currentLogName = await getCurrentLogFileName(options);
+        let currentLogName = await getCurrentLogFileName(options);
 
         if (logFileName.length === 0 || currentLogName !== logFileName) {
             logFileName = currentLogName;
         }
 
-        var streamPath = path.join(options.storagePath + '/' + appendedDirectory);
+        let streamPath = path.join(options.storagePath + '/' + appendedDirectory);
 
         //This should be executed only once
         if (!loggerInitializedOnce) {
@@ -168,8 +168,8 @@ module.exports = function (options) {
                     logContentToFile(res, req, streamPath, logFileName);
                 }
 
-                next()
+                next();
             });
-        next()
+        next();
     }
 };

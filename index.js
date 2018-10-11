@@ -3,5 +3,5 @@ versionChecker();
 const logger = require('./logger');
 
 module.exports = function (options) {
-    logger(options);
+    return logger(options);
 }
