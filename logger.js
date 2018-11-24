@@ -167,8 +167,6 @@ module.exports = function (options) {
                 } else if (options.logMode === 'errors' && res.statusCode >= 400) {
                     logContentToFile(res, req, streamPath, logFileName);
                 }
-
-                next();
             });
         next();
 
